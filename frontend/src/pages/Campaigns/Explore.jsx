@@ -207,7 +207,7 @@ const Explore = () => {
       <Footer />
 
       {/* Custom animations */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

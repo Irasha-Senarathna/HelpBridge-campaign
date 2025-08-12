@@ -9,8 +9,8 @@ const CampaignForm = ({ formData, handleChange, handleSubmit, resetForm, editing
       <InputField
         label="Campaign Title"
         type="text"
-        name="title"
-        value={formData.title}
+        name="Title"
+        value={formData.Title || ''}
         onChange={handleChange}
         placeholder="Enter an inspiring campaign title"
         required
@@ -22,8 +22,8 @@ const CampaignForm = ({ formData, handleChange, handleSubmit, resetForm, editing
           Campaign Description
         </label>
         <textarea
-          name="description"
-          value={formData.description}
+          name="Description"
+          value={formData.Description || ''}
           onChange={handleChange}
           rows={4}
           className="w-full px-4 py-3 bg-white/80 border border-white/50 rounded-xl text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all duration-300"
@@ -33,29 +33,89 @@ const CampaignForm = ({ formData, handleChange, handleSubmit, resetForm, editing
       </div>
 
       <InputField
-        label="Contact Number"
-        type="tel"
-        name="contact"
-        value={formData.contact}
+        label="Target Amount"
+        type="number"
+        name="Target_amount"
+        value={formData.Target_amount || ''}
         onChange={handleChange}
-        placeholder="0771234567"
+        placeholder="Enter target amount"
         required
         className="bg-white/80 border-white/50 focus:border-orange-400 focus:ring-orange-100 rounded-xl"
       />
 
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-3">
+          Product Type
+        </label>
+        <select
+          name="Product"
+          value={formData.Product || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-3 bg-white/80 border border-white/50 rounded-xl text-gray-800 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all duration-300"
+          required
+        >
+          <option value="">Select product type</option>
+          <option value="Food">Food</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Medicine">Medicine</option>
+          <option value="Education">Education</option>
+          <option value="Shelter">Shelter</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <InputField
+        label="Recipient ID (Optional)"
+        type="text"
+        name="recipient"
+        value={formData.recipient || ''}
+        onChange={handleChange}
+        placeholder="Leave empty to use yourself as recipient"
+        className="bg-white/80 border-white/50 focus:border-orange-400 focus:ring-orange-100 rounded-xl"
+      />
+
+      <div>
+        <label className="block text-sm font-bold text-gray-700 mb-3">
+          Start Date
+        </label>
+        <input
+          type="date"
+          name="Start_date"
+          value={formData.Start_date || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-3 bg-white/80 border border-white/50 rounded-xl text-gray-800 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all duration-300"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-bold text-gray-700 mb-3">
+          End Date
+        </label>
+        <input
+          type="date"
+          name="End_date"
+          value={formData.End_date || ''}
+          onChange={handleChange}
+          className="w-full px-4 py-3 bg-white/80 border border-white/50 rounded-xl text-gray-800 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all duration-300"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-bold text-gray-700 mb-3">
           Campaign Status
         </label>
         <select
-          name="status"
-          value={formData.status}
+          name="Status"
+          value={formData.Status || 'Active'}
           onChange={handleChange}
           className="w-full px-4 py-3 bg-white/80 border border-white/50 rounded-xl text-gray-800 focus:ring-2 focus:ring-orange-100 focus:border-orange-400 transition-all duration-300"
         >
           <option value="Active">Active</option>
           <option value="Completed">Completed</option>
           <option value="Paused">Paused</option>
+          <option value="Cancelled">Cancelled</option>
         </select>
       </div>
 
