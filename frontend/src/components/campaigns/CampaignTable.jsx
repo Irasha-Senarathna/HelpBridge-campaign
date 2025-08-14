@@ -1,15 +1,16 @@
-
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { FaEdit, FaTrash, FaEye, FaPlus } from 'react-icons/fa';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import CampaignForm from './CampaignForm';
 
-const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) => {
-  const [showEditModal, setShowEditModal] = useState(false);
+const CampaignTable = forwardRef((props, ref) => {
+  const { campaigns, onCampaignUpdate, onCampaignDelete, user } = props;
+
+  // Remove showEditModal since we're showing edit form inline now
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showForm, setShowForm] = useState(false); // Single state for both create and edit
 
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,8 +24,18 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
     Status: 'Active'
   });
   const [loading, setLoading] = useState(false);
+  // ADD THE useImperativeHandle RIGHT HERE, AFTER THE STATE DECLARATIONS:
+  useImperativeHandle(ref, () => ({
+    openCreateForm: () => {
+      if (!localStorage.getItem('token')) {
+        alert('Please login to create campaigns');
+        return;
+      }
+      handleCreate();
+    }
+  }));
 
-  // Handle Edit: open modal with data loaded
+  // Handle Edit: show form inline with data loaded
   const handleEdit = (campaign) => {
     setSelectedCampaign(campaign);
     setFormData({
@@ -37,7 +48,7 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
       End_date: campaign.End_date ? new Date(campaign.End_date).toISOString().split('T')[0] : '',
       Status: campaign.Status
     });
-    setShowEditModal(true);
+    setShowForm(true); // Show form inline
   };
 
   // Handle Delete: open delete confirmation modal
@@ -52,10 +63,10 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
     setShowViewModal(true);
   };
 
-  // Handle Create: show create form outside table
+  // Handle Create: show form inline with empty data
   const handleCreate = () => {
-    setShowCreateForm(true);
-    setSelectedCampaign(null);
+    setShowForm(true);
+    setSelectedCampaign(null); // null means create mode
     setFormData({
       Title: '',
       Description: '',
@@ -122,15 +133,12 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
           onCampaignUpdate(result.data);
         }
 
-        if (selectedCampaign) {
-          setShowEditModal(false);
-          alert('Campaign updated successfully!');
-        } else {
-          // Created new campaign
-          setShowCreateForm(false);
-          alert('Campaign created successfully!');
-        }
+        // Hide form and show success message
+        setShowForm(false);
+        const action = selectedCampaign ? 'updated' : 'created';
+        alert(`Campaign ${action} successfully!`);
 
+        // Reset form
         setFormData({
           Title: '',
           Description: '',
@@ -205,7 +213,7 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
       End_date: '',
       Status: 'Active'
     });
-    setShowCreateForm(false);
+    setShowForm(false);
     setSelectedCampaign(null);
   };
 
@@ -253,11 +261,8 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
               }
               handleCreate();
             }}
-            data-create-campaign
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
           >
-            <FaPlus className="text-sm" />
-            Create Campaign
+            <FaPlus className="text-sm" /> Create Campaign
           </Button>
         </div>
       </div>
@@ -393,44 +398,38 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
         </div>
       )}
 
-      {/* Create Form shown outside the table */}
-      {showCreateForm && (
-        <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg">
+      {/* Single Form for both Create and Edit - shows inline */}
+      {showForm && (
+        <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded-xl shadow-lg border-2 border-orange-200">
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-gray-800">
+              {selectedCampaign ? `Edit Campaign: ${selectedCampaign.Title}` : 'Create New Campaign'}
+            </h3>
+            <p className="text-gray-600">
+              {selectedCampaign ? 'Update the campaign details below' : 'Fill in the details to create a new campaign'}
+            </p>
+          </div>
+          
           <CampaignForm
             formData={formData}
             handleChange={handleFormChange}
-            handleSubmit={async (e) => {
-              await handleFormSubmit(e);
-              setShowCreateForm(false);
-            }}
-            resetForm={() => setShowCreateForm(false)}
-            editingCampaign={null}
+            handleSubmit={handleFormSubmit}
+            resetForm={resetForm}
+            editingCampaign={selectedCampaign}
           />
-          <Button
-            onClick={() => setShowCreateForm(false)}
-            className="mt-4 px-6 py-3 bg-gray-300 rounded-lg font-semibold hover:bg-gray-400 transition"
-          >
-            Cancel
-          </Button>
+          
+          <div className="flex justify-end space-x-4 mt-6 pt-6 border-t border-gray-200">
+            <Button
+              onClick={() => setShowForm(false)}
+              className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       )}
 
-      {/* Edit Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        title="Edit Campaign"
-      >
-        <CampaignForm
-          formData={formData}
-          handleChange={handleFormChange}
-          handleSubmit={handleFormSubmit}
-          resetForm={resetForm}
-          editingCampaign={selectedCampaign}
-        />
-      </Modal>
-
-      {/* View Modal */}
+      {/* View Modal - Keep this as modal since it's just for viewing */}
       <Modal
         isOpen={showViewModal}
         onClose={() => setShowViewModal(false)}
@@ -542,6 +541,6 @@ const CampaignTable = ({ campaigns, onCampaignUpdate, onCampaignDelete, user }) 
       </Modal>
     </div>
   );
-};
+});
 
 export default CampaignTable;

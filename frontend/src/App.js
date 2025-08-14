@@ -20,6 +20,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} />
+        <Route path="/explore" element={<Explore />} />
+        <Route path="/start-campaign" element={<StartCampaign />} />
       </Routes>
     </Router>
   );

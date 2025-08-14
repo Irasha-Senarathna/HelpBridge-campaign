@@ -1,5 +1,4 @@
 // src/pages/Campaigns/Explore.jsx
-import React from 'react';
 import CampaignCard from '../../components/campaigns/CampaignCard';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -10,8 +9,18 @@ import stationaryImage from '../../assets/images/stationary.jpg';
 import medicineImage from '../../assets/images/medicine.jpg';
 import booksImage from '../../assets/images/books.jpg';
 import StartCampaign from './StartCampaign';
+import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const Explore = () => {
+  const campaignsSectionRef = useRef(null);
+  const navigate = useNavigate();
+
+
+  const scrollToCampaigns = () => {
+    campaignsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   const campaigns = [
     {
       id: 1,
@@ -97,7 +106,9 @@ const Explore = () => {
                 For the past 20 years, we've been partnering with governments, corporates, donors, sponsors, and individuals like you to improve the wellbeing of the most vulnerable children around the world.
               </p>
               
-              <button className="group bg-white text-gray-800 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <button 
+              onClick={scrollToCampaigns}
+              className="group bg-white text-gray-800 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 Learn More
                 <svg className="inline ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -164,7 +175,7 @@ const Explore = () => {
         </section>
 
         {/* Enhanced Campaign Grid Section */}
-        <section className="py-16 relative">
+        <section ref={campaignsSectionRef} className="py-16 relative">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">
@@ -195,7 +206,9 @@ const Explore = () => {
               <div className="bg-white/60 backdrop-blur-sm border border-white/50 rounded-3xl p-8 max-w-2xl mx-auto shadow-lg">
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Ready to Make a Difference?</h3>
                 <p className="text-gray-600 mb-6">Join thousands of compassionate individuals who are changing lives every day.</p>
-                <button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <button 
+                  onClick={() => navigate('/start-campaign')} 
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-4 px-8 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   Start Your Own Campaign
                 </button>
               </div>

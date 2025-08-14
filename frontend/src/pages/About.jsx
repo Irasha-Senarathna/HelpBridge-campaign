@@ -8,8 +8,12 @@ import amaraImage from '../assets/images/amara.jpeg';
 import davidImage from '../assets/images/david.jpg';
 import emilyImage from '../assets/images/emily.jpg';
 import thomasImage from '../assets/images/thamos.jpg'; 
+import { useNavigate } from 'react-router-dom';
+
 
 const About = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
       {/* Background elements */}
@@ -57,13 +61,26 @@ const About = () => {
               </p>
               
               <div className="flex justify-center gap-6 flex-wrap">
-                <button className="group bg-white text-gray-800 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                  Our Mission
+                <button 
+onClick={() => {
+  const section = document.getElementById("Our Team");
+  const headerOffset = 100; // adjust this to match your header height
+  const elementPosition = section.getBoundingClientRect().top + window.scrollY;
+  const offsetPosition = elementPosition - headerOffset;
+
+  window.scrollTo({
+    top: offsetPosition,
+    behavior: "smooth"
+  });
+}}                className="group bg-white text-gray-800 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  Our Team
                   <svg className="inline ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                   </svg>
                 </button>
-                <button className="group border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                <button 
+                onClick={() => navigate('/start-campaign')}
+                className="group border-2 border-white text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-white hover:text-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   Join Our Cause
                 </button>
               </div>
@@ -73,7 +90,7 @@ const About = () => {
 
         {/* Enhanced Impact Section */}
         <section className="py-16 relative">
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -227,7 +244,7 @@ const About = () => {
         </section>
 
         {/* Enhanced Team Section */}
-        <section className="py-16 relative">
+        <section id="Our Team" className="py-16 relative">
           <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-7xl mx-auto">
