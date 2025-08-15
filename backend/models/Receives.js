@@ -1,10 +1,11 @@
-// backend/models/Receives.js
 const mongoose = require('mongoose');
 
 const receivesSchema = new mongoose.Schema({
-  User_ID: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  Donation_ID: { type: mongoose.Schema.Types.ObjectId, ref: 'Donation' },
-  N: Number // Assuming this is quantity or similar
+  campaign: { type: mongoose.Schema.Types.ObjectId, ref: 'Campaigns', required: true },
+  donation: { type: mongoose.Schema.Types.ObjectId, ref: 'Donations' }, // optional
+  item_name: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  date_received: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Receives', receivesSchema);
