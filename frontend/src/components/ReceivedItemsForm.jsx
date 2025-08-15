@@ -71,4 +71,5 @@ export const DonateItemsForm = ({ campaignId, neededItems }) => {
         </div>
     );
 };
+const ReceivedItemsForm = DonateItemsForm;
 export default ReceivedItemsForm;

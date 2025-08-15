@@ -5,6 +5,7 @@ import ProgressBar from '../../components/ProgressBar';
 import DonationForm from '../../components/DonationForm';
 import ReceivedItemsList from '../../components/ReceivedItemsList';
 import ReceivedItemsForm  from '../../components/ReceivedItemsForm';
+import DonationList from '../../components/DonationList';
 
 
 
