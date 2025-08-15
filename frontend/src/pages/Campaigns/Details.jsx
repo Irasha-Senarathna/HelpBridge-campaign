@@ -3,8 +3,9 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import ProgressBar from '../../components/ProgressBar';
 import DonationForm from '../../components/DonationForm';
-import DonationList from '../../components/DonationList';
 import ReceivedItemsList from '../../components/ReceivedItemsList';
+import ReceivedItemsForm  from '../../components/ReceivedItemsForm';
+
 
 
 
