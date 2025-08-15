@@ -7,6 +7,8 @@ import About from './pages/About';
 import StartCampaign from './pages/Campaigns/StartCampaign';
 import Register from './pages/Auth/Register';
 import Login from './pages/Auth/Login';
+import Details from './pages/Campaigns/Details';
+
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <Route path="/auth/register" element={<Register />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/start-campaign" element={<StartCampaign />} />
+        <Route path="/campaigns/details/:id?" element={<Details />} />
+
       </Routes>
     </Router>
   );
