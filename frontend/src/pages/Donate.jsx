@@ -1,5 +1,5 @@
 // src/pages/Campaigns/Donate.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import cloths1Image from '../assets/images/cloths1.jpg';
@@ -7,77 +7,96 @@ import stationaryImage from '../assets/images/stationary.jpg';
 import medicineImage from '../assets/images/medicine.jpg';
 import booksImage from '../assets/images/books.jpg';
 import { useNavigate } from 'react-router-dom';
+import DonationList from '../components/DonationList';
 
 
 const Donate = () => {
   const [donationAmounts, setDonationAmounts] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [donations, setDonations] = useState([]);
   const navigate = useNavigate();
   
 
 
-  const campaigns = [
-    {
-      id: 1,
-      title: "Clean Water for Villages",
-      description: "Fund wells and filters to provide safe drinking water, saving lives and transforming entire communities.",
-      daysLeft: 155,
-      targetAmount: "36,000,000",
-      raised: "25,000",
-      goal: "100,000",
-      startDate: "2023-01-19",
-      endDate: "2023-12-31",
-      image: cloths1Image,
-      progress: 25,
-      gradient: "from-blue-400 to-cyan-500",
-      urgency: "high"
-    },
-    {
-      id: 2,
-      title: "Meals for Hungry Kids",
-      description: "Feed malnourished children with nutritious meals for healthy growth and better learning outcomes.",
-      daysLeft: 75,
-      targetAmount: "6,000,000",
-      raised: "500",
-      goal: "10,000",
-      startDate: "2023-01-19",
-      endDate: "2023-12-31",
-      image: medicineImage,
-      progress: 5,
-      gradient: "from-green-400 to-emerald-500",
-      urgency: "critical"
-    },
-    {
-      id: 3,
-      title: "Solar Lights for Rural Homes",
-      description: "Provide solar lamps to families without electricity for safety, security and children's education.",
-      daysLeft: 105,
-      targetAmount: "1,000,000",
-      raised: "2,400",
-      goal: "10,000",
-      startDate: "2023-02-15",
-      endDate: "2023-12-31",
-      image: stationaryImage,
-      progress: 24,
-      gradient: "from-yellow-400 to-orange-500",
-      urgency: "moderate"
-    },
-    {
-      id: 4,
-      title: "Women's Vocational Training",
-      description: "Teach valuable skills like sewing and farming to empower women economically and socially.",
-      daysLeft: 105,
-      targetAmount: "36,000,000",
-      raised: "20,000",
-      goal: "10,000",
-      startDate: "2023-02-15",
-      endDate: "2023-12-31",
-      image: booksImage,
-      progress: 200,
-      gradient: "from-purple-400 to-pink-500",
-      urgency: "funded"
-    }
-  ];
+  // campaigns will be fetched from backend (do not hardcode)
+  const [campaigns, setCampaigns] = useState([]);
+
+  const computeUrgency = (progress, daysLeft) => {
+    if (progress >= 100) return 'funded';
+    if (daysLeft <= 7) return 'critical';
+    if (progress >= 50) return 'high';
+    return 'moderate';
+  };
+
+  // Map product types to local fallback images
+  const productImageMap = {
+    Clothing: cloths1Image,
+    Education: booksImage,
+    Medicine: medicineImage,
+    Stationary: stationaryImage,
+    Food: cloths1Image,
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchCampaigns = async () => {
+      try {
+        // fetch only active campaigns from backend
+        const res = await fetch(${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/campaigns?status=Active&limit=20);
+        if (!res.ok) throw new Error('Failed to fetch campaigns');
+        const json = await res.json();
+        // backend returns { success, data: campaigns, ... }
+        const raw = Array.isArray(json) ? json : (json.data || []);
+
+        const mapped = raw.map(c => {
+          const id = c.Campaign_ID || c.Campaign_ID || c._id || (c._id && c._id.$oid) || c.id;
+          const title = c.Title || c.title || c.Campaign_ID || 'Untitled Campaign';
+          const description = c.Description || c.description || '';
+          const targetAmount = c.Target_amount ?? c.target_amount ?? 0;
+          const raised = c.Current_donation ?? c.Current_donation ?? 0;
+          const startDate = c.Start_date || c.start_date || null;
+          const endDate = c.End_date || c.end_date || null;
+
+          // compute daysLeft and progress
+          const now = new Date();
+          const end = endDate ? new Date(endDate) : null;
+          const daysLeft = end ? Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24))) : 0;
+          const progress = (c.progressPercentage != null) ? Number(c.progressPercentage) : (targetAmount > 0 ? Math.round((raised / targetAmount) * 100) : 0);
+          const urgency = computeUrgency(progress, daysLeft);
+
+          const product = c.Product || c.product || 'Other';
+          const image = c.image || productImageMap[product] || booksImage;
+
+          // gradient class derived from urgency
+          const gradient = getUrgencyColor(urgency);
+
+          return {
+            id,
+            title,
+            description,
+            daysLeft,
+            targetAmount,
+            raised,
+            goal: targetAmount,
+            startDate,
+            endDate,
+            image,
+            progress: Math.min(Math.round(progress), 100),
+            gradient,
+            urgency
+          };
+        });
+
+        if (!cancelled) setCampaigns(mapped);
+      } catch (err) {
+        console.error('Error fetching campaigns:', err);
+      }
+    };
+
+    fetchCampaigns();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleDonate = (campaignId) => {
     const amount = donationAmounts[campaignId] || '';
@@ -111,6 +130,24 @@ const Donate = () => {
       default: return 'ACTIVE';
     }
   };
+
+  // Fetch donations from backend
+  useEffect(() => {
+    let cancelled = false;
+    const fetchDonations = async () => {
+      try {
+        const res = await fetch(${process.env.REACT_APP_API_URL || ''}/api/donations);
+        if (!res.ok) throw new Error('Failed to fetch donations');
+        const data = await res.json();
+        if (!cancelled) setDonations(data);
+      } catch (err) {
+        console.error('Error fetching donations:', err);
+      }
+    };
+
+    fetchDonations();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -275,7 +312,7 @@ const Donate = () => {
                   key={campaign.id}
                   className="group bg-white/70 backdrop-blur-sm border border-white/50 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                   style={{
-                    animationDelay: `${index * 150}ms`
+                    animationDelay: ${index * 150}ms
                   }}
                 >
                   {/* Campaign Image */}
@@ -289,7 +326,7 @@ const Donate = () => {
                     
                     {/* Urgency Badge */}
                     <div className="absolute top-4 left-4">
-                      <div className={`px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getUrgencyColor(campaign.urgency)} shadow-lg backdrop-blur-sm border border-white/20`}>
+                      <div className={px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getUrgencyColor(campaign.urgency)} shadow-lg backdrop-blur-sm border border-white/20}>
                         {getUrgencyText(campaign.urgency)}
                       </div>
                     </div>
@@ -329,8 +366,8 @@ const Donate = () => {
                       {/* Progress Bar */}
                       <div className="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
                         <div 
-                          className={`h-full bg-gradient-to-r ${campaign.gradient} rounded-full transition-all duration-1000 ease-out`}
-                          style={{ width: `${Math.min(campaign.progress, 100)}%` }}
+                          className={h-full bg-gradient-to-r ${campaign.gradient} rounded-full transition-all duration-1000 ease-out}
+                          style={{ width: ${Math.min(campaign.progress, 100)}% }}
                         ></div>
                       </div>
                       <p className="text-sm text-gray-500 text-center">{campaign.progress}% funded</p>
@@ -350,7 +387,7 @@ const Donate = () => {
                         </div>
                         <button 
                           onClick={() => handleDonate(campaign.id)}
-                          className={`px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${campaign.gradient} hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200`}
+                          className={px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${campaign.gradient} hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200}
                         >
                           Donate
                         </button>
@@ -395,7 +432,9 @@ const Donate = () => {
                 </div>
               ))}
             </div>
-            
+            <div className="mt-8">
+              <DonationList donations={donations} />
+            </div>
             {/* Call to Action */}
             <div className="text-center mt-16">
               <div className="bg-white/60 backdrop-blur-sm border border-white/50 rounded-3xl p-8 max-w-2xl mx-auto shadow-lg">
