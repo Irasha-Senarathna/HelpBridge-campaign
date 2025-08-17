@@ -1,26 +1,26 @@
-// backend/controllers/donationController.js
-const Donation = require('../models/Donation');
+const Donations = require('../models/Donation');
 
-exports.getDonations = async (req, res) => {
-  const donations = await Donation.find()
-    .populate('User_ID')
-    .populate('Location_ID')
-    .populate('Campaign_ID');
-  res.json(donations);
-};
-
+// Create donation
 exports.createDonation = async (req, res) => {
-  const newDonation = new Donation(req.body);
-  const saved = await newDonation.save();
-  res.json(saved);
+  try {
+    const donation = await Donations.create({
+      donation_amount: req.body.donation_amount,
+      campaign: req.body.campaign,
+      donor: req.body.donor
+    });
+    res.status(201).json(donation);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
-exports.updateDonation = async (req, res) => {
-  const updated = await Donation.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
-};
-
-exports.deleteDonation = async (req, res) => {
-  await Donation.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Donation deleted' });
+// Get donations for a campaign
+exports.getDonationsByCampaign = async (req, res) => {
+  try {
+    const donations = await Donations.find({ campaign: req.params.campaignId })
+      .populate('donor', 'name email');
+    res.json(donations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };

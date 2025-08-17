@@ -19,15 +19,12 @@ const createUser = async (req, res) => {
                 suggestion: 'Please try with a different email address'
             });
         }
-
-        // Hash password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-
+        
         // Create new user
         const user = await User.create({
             name,
             email,
-            password: hashedPassword,
+            password, 
             user_type
         });
 

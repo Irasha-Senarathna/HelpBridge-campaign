@@ -1,25 +1,31 @@
-// backend/controllers/receivesController.js
 const Receives = require('../models/Receives');
 
-exports.getReceives = async (req, res) => {
-  const receives = await Receives.find()
-    .populate('User_ID')
-    .populate('Donation_ID');
-  res.json(receives);
+// Add received item
+exports.addReceivedItem = async (req, res) => {
+  try {
+    const received = await Receives.create({
+      campaign: req.body.campaign,
+      donation: req.body.donation,
+      item_name: req.body.item_name,
+      quantity: req.body.quantity
+    });
+    res.status(201).json(received);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
-exports.createReceives = async (req, res) => {
-  const newReceives = new Receives(req.body);
-  const saved = await newReceives.save();
-  res.json(saved);
+// Get received items for a campaign
+exports.getReceivedItemsByCampaign = async (req, res) => {
+  try {
+    const items = await Receives.find({ campaign: req.params.campaignId })
+      .populate('donation');
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
-exports.updateReceives = async (req, res) => {
-  const updated = await Receives.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
-};
 
-exports.deleteReceives = async (req, res) => {
-  await Receives.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Receives record deleted' });
-};
+
+

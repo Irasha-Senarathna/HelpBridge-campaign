@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 exports.getCampaigns = async (req, res) => {
     try {
         const { status, search, product, page = 1, limit = 10 } = req.query;
-        
+
         // Build query
         const query = {};
         if (status) query.Status = status;
@@ -19,7 +19,7 @@ exports.getCampaigns = async (req, res) => {
 
         // Pagination
         const skip = (page - 1) * limit;
-        
+
         const [campaigns, total] = await Promise.all([
             Campaign.find(query)
                 .populate('Created_by', 'name email user_type')
@@ -53,7 +53,7 @@ exports.getCampaigns = async (req, res) => {
 exports.createCampaign = async (req, res) => {
     try {
         const { Title, Description, Target_amount, Product, recipient } = req.body;
-        
+
         // File handling
         const image = req.file?.path || null;
 
@@ -87,7 +87,7 @@ exports.createCampaign = async (req, res) => {
         });
 
         const savedCampaign = await newCampaign.save();
-        
+
         // Populate data
         await savedCampaign.populate([
             { path: 'Created_by', select: 'name email' },
@@ -113,7 +113,7 @@ exports.createCampaign = async (req, res) => {
 exports.updateCampaign = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Find and validate campaign
         const campaign = await Campaign.findOne({ Campaign_ID: id });
         if (!campaign) {
@@ -139,7 +139,7 @@ exports.updateCampaign = async (req, res) => {
         if (updateData.Start_date || updateData.End_date) {
             const start = updateData.Start_date ? new Date(updateData.Start_date) : campaign.Start_date;
             const end = updateData.End_date ? new Date(updateData.End_date) : campaign.End_date;
-            
+
             if (end <= start) {
                 return res.status(400).json({
                     success: false,
@@ -176,7 +176,7 @@ exports.updateCampaign = async (req, res) => {
 exports.deleteCampaign = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const campaign = await Campaign.findOne({ Campaign_ID: id });
         if (!campaign) {
             return res.status(404).json({
@@ -194,9 +194,7 @@ exports.deleteCampaign = async (req, res) => {
         }
 
         await Campaign.findOneAndDelete({ Campaign_ID: id });
-        
-        // Here you could add cleanup logic for associated files/images if needed
-        
+
         res.status(200).json({
             success: true,
             data: null
@@ -212,11 +210,11 @@ exports.deleteCampaign = async (req, res) => {
     }
 };
 
-// Get single campaign with additional data
-exports.getCampaign = async (req, res) => {
+// Get single campaign with additional data (renamed to getCampaignById)
+exports.getCampaignById = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const campaign = await Campaign.findOne({ Campaign_ID: id })
             .populate('Created_by', 'name email user_type')
             .populate('recipient', 'name email');
@@ -227,7 +225,7 @@ exports.getCampaign = async (req, res) => {
                 message: 'Campaign not found'
             });
         }
-        
+
         res.status(200).json({
             success: true,
             data: campaign

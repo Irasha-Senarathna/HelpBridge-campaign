@@ -1,4 +1,14 @@
 import React from 'react';
+// Utility function to format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+};
+
 
 
 const ReceivedItemsList = ({ items }) => {
