@@ -43,7 +43,7 @@ const Donate = () => {
     const fetchCampaigns = async () => {
       try {
         // fetch only active campaigns from backend
-        const res = await fetch(${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/campaigns?status=Active&limit=20);
+        const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/campaigns?status=Active&limit=20`);
         if (!res.ok) throw new Error('Failed to fetch campaigns');
         const json = await res.json();
         // backend returns { success, data: campaigns, ... }
@@ -136,7 +136,7 @@ const Donate = () => {
     let cancelled = false;
     const fetchDonations = async () => {
       try {
-        const res = await fetch(${process.env.REACT_APP_API_URL || ''}/api/donations);
+        const res = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/donations`);
         if (!res.ok) throw new Error('Failed to fetch donations');
         const data = await res.json();
         if (!cancelled) setDonations(data);
@@ -312,7 +312,7 @@ const Donate = () => {
                   key={campaign.id}
                   className="group bg-white/70 backdrop-blur-sm border border-white/50 rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                   style={{
-                    animationDelay: ${index * 150}ms
+                    animationDelay: `${index * 150}ms`
                   }}
                 >
                   {/* Campaign Image */}
@@ -326,7 +326,7 @@ const Donate = () => {
                     
                     {/* Urgency Badge */}
                     <div className="absolute top-4 left-4">
-                      <div className={px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getUrgencyColor(campaign.urgency)} shadow-lg backdrop-blur-sm border border-white/20}>
+                      <div className={`px-4 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r ${getUrgencyColor(campaign.urgency)} shadow-lg backdrop-blur-sm border border-white/20`}>
                         {getUrgencyText(campaign.urgency)}
                       </div>
                     </div>
@@ -366,8 +366,8 @@ const Donate = () => {
                       {/* Progress Bar */}
                       <div className="w-full bg-gray-200 rounded-full h-3 mb-2 overflow-hidden">
                         <div 
-                          className={h-full bg-gradient-to-r ${campaign.gradient} rounded-full transition-all duration-1000 ease-out}
-                          style={{ width: ${Math.min(campaign.progress, 100)}% }}
+                          className={`h-full bg-gradient-to-r ${campaign.gradient} rounded-full transition-all duration-1000 ease-out`}
+                          style={{ width: `${Math.min(campaign.progress, 100)}%` }}
                         ></div>
                       </div>
                       <p className="text-sm text-gray-500 text-center">{campaign.progress}% funded</p>
@@ -387,7 +387,7 @@ const Donate = () => {
                         </div>
                         <button 
                           onClick={() => handleDonate(campaign.id)}
-                          className={px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${campaign.gradient} hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200}
+                          className={`px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r ${campaign.gradient} hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-200`}
                         >
                           Donate
                         </button>

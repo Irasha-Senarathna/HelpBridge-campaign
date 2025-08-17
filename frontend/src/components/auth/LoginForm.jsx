@@ -4,13 +4,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import Button from '../ui/Button.jsx';
 import InputField from '../ui/InputField.jsx';
 
-const LoginForm = () => {
+const LoginForm = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,28 +19,25 @@ const LoginForm = () => {
     try {
       const response = await fetch('http://localhost:5000/api/users/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Store token in localStorage
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.data));
-        
+
+        if (onLogin) onLogin(data.data); // <-- callback to parent
+
         console.log('Login successful:', data);
-        
-        // Navigate to explore page after login
         navigate('/campaigns/explore');
       } else {
         setError(data.message || 'Login failed');
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (err) {
+      console.error('Login error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -50,7 +46,7 @@ const LoginForm = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated background elements */}
+      {/* Animated background */}
       <div className="absolute inset-0">
         <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
@@ -67,7 +63,7 @@ const LoginForm = () => {
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 8}s`,
-              animationDuration: `${8 + Math.random() * 4}s`
+              animationDuration: `${8 + Math.random() * 4}s`,
             }}
           />
         ))}
@@ -81,9 +77,7 @@ const LoginForm = () => {
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md">
-          {/* Glassmorphism container */}
           <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-8 shadow-2xl">
-            {/* Header */}
             <div className="text-center mb-8">
               <div className="relative inline-block mb-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
@@ -98,14 +92,12 @@ const LoginForm = () => {
               <p className="text-white/70 text-sm">Sign in to continue to your account</p>
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
                 {error}
               </div>
             )}
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
                 <div className="relative group">
@@ -136,31 +128,25 @@ const LoginForm = () => {
               </div>
 
               <div className="flex justify-end">
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-purple-300 hover:text-purple-200 transition-colors duration-200 relative group"
-                >
+                <Link to="/forgot-password" className="text-sm text-purple-300 hover:text-purple-200 transition-colors duration-200 relative group">
                   Forgot Password?
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-300 group-hover:w-full transition-all duration-300"></span>
                 </Link>
               </div>
 
               <div className="relative group">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   disabled={loading}
                   className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="relative z-10">
-                    {loading ? 'Signing in...' : 'Sign in'}
-                  </span>
+                  <span className="relative z-10">{loading ? 'Signing in...' : 'Sign in'}</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                 </Button>
               </div>
             </form>
 
-            {/* Footer */}
             <div className="mt-8 text-center">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
@@ -171,20 +157,13 @@ const LoginForm = () => {
                 </div>
               </div>
               <div className="mt-4">
-                <Link 
-                  to="/signup" 
-                  className="text-purple-300 hover:text-purple-200 font-medium transition-colors duration-200 relative group inline-block"
-                >
+                <Link to="/signup" className="text-purple-300 hover:text-purple-200 font-medium transition-colors duration-200 relative group inline-block">
                   Create an account
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-purple-300 group-hover:w-full transition-all duration-300"></span>
                 </Link>
               </div>
             </div>
           </div>
-
-          {/* Additional floating elements */}
-          <div className="absolute top-1/4 left-0 w-2 h-16 bg-gradient-to-b from-purple-400 to-transparent rounded-full opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-0 w-2 h-20 bg-gradient-to-t from-pink-400 to-transparent rounded-full opacity-30 animate-pulse animation-delay-2000"></div>
         </div>
       </div>
 
@@ -194,15 +173,9 @@ const LoginForm = () => {
           33% { transform: translateY(-20px) rotate(120deg); }
           66% { transform: translateY(-10px) rotate(240deg); }
         }
-        .animate-float {
-          animation: float 12s ease-in-out infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
+        .animate-float { animation: float 12s ease-in-out infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
       `}</style>
     </div>
   );
