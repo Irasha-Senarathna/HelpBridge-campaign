@@ -48,7 +48,7 @@ const Header = ({ activeTab }) => {
               to="/auth/login"
               className="px-5 py-2.5 text-base font-medium text-red-600 hover:text-red-700 transition-colors"
             >
-              Login
+              Logout
             </Link>
             <Link
               to="/auth/register"
