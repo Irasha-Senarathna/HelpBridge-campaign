@@ -98,14 +98,51 @@ const Donate = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const handleDonate = (campaignId) => {
-    const amount = donationAmounts[campaignId] || '';
-    if (amount) {
-      setShowSuccess(true);
-      setDonationAmounts(prev => ({ ...prev, [campaignId]: '' }));
-      setTimeout(() => setShowSuccess(false), 3000);
+  // ...existing code...
+
+const handleDonate = (campaignId) => {
+    const amount = Number(donationAmounts[campaignId]) || 0;
+    
+    if (amount <= 0) {
+        toast.error('Please enter a valid amount');
+        return;
     }
-  };
+
+    // Update campaigns with new donation amount
+    setCampaigns(prevCampaigns => 
+        prevCampaigns.map(campaign => {
+            if (campaign.id === campaignId) {
+                const newRaised = Number(campaign.raised) + amount;
+                const newProgress = Math.min(
+                    Math.round((newRaised / campaign.targetAmount) * 100),
+                    100
+                );
+                
+                return {
+                    ...campaign,
+                    raised: newRaised,
+                    progress: newProgress
+                };
+            }
+            return campaign;
+        })
+    );
+
+    // Update donations list
+    setDonations(prev => [...prev, {
+        id: Date.now(),
+        campaignId,
+        amount,
+        date: new Date().toISOString()
+    }]);
+
+    // Clear donation amount and show success message
+    setDonationAmounts(prev => ({ ...prev, [campaignId]: '' }));
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+};
+
+// ...existing code...
 
   const handleAmountChange = (campaignId, value) => {
     setDonationAmounts(prev => ({ ...prev, [campaignId]: value }));
