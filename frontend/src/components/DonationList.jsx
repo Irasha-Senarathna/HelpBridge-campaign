@@ -1,41 +1,42 @@
 // src/components/DonationList.jsx
 import React from 'react';
 
-export default function DonationList({ donations = [] }) {
-    if (!donations || donations.length === 0) return (
-        <div className="p-4 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-medium">Recent Donations</h3>
-            <p className="text-sm text-gray-500 mt-2">No donations yet.</p>
-        </div>
-    );
+const DonationList = ({ donations }) => {
+    // Ensure donations is an array
+    const donationArray = Array.isArray(donations) ? donations : [];
+
+    if (donationArray.length === 0) {
+        return (
+            <div className="text-center p-4 bg-gray-50 rounded">
+                <p className="text-gray-500">No donations yet</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="p-4 bg-white rounded-lg shadow-sm">
-            <h3 className="text-lg font-medium mb-3">Recent Donations</h3>
-            <ul className="space-y-2">
-                {donations.map(d => {
-                    // backend returns fields like Donator_amount, made_duration, User_ID, Campaign_ID
-                    const id = d._id || d.id;
-                    const amount = d.Donator_amount ?? d.amount ?? 0;
-                    const date = d.made_duration ? new Date(d.made_duration).toLocaleString() : (d.date || 'Unknown');
-                    const user = d.User_ID?.name || d.User_ID?.email || (d.User_ID || 'Anonymous');
-                    const campaign = d.Campaign_ID?.Title || d.Campaign_ID || 'General';
-
-                    return (
-                        <li key={id} className="flex justify-between items-center border rounded-lg p-3">
-                            <div>
-                                <div className="text-sm text-gray-600">{user}</div>
-                                <div className="font-semibold">{campaign}</div>
-                                <div className="text-xs text-gray-500">{date}</div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-sm text-gray-500">Amount</div>
-                                <div className="text-lg font-bold">LKR {Number(amount).toLocaleString()}</div>
-                            </div>
-                        </li>
-                    );
-                })}
-            </ul>
+        <div className="space-y-4">
+            {donationArray.map((donation) => (
+                <div 
+                    key={donation._id} 
+                    className="border p-4 rounded shadow-sm bg-white"
+                >
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <p className="font-semibold text-lg">
+                                LKR {donation.donation_amount?.toLocaleString() || 0}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                by {donation.donor?.name || 'Anonymous'}
+                            </p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {new Date(donation.date).toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+            ))}
         </div>
     );
-}
+};
+
+export default DonationList;

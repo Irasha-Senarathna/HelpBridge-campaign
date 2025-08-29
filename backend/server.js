@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const donationRoutes = require('./routes/donationRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +20,7 @@ app.use(express.json());
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/campaigns', require('./routes/campaignRoutes'));
 // Donations API
-app.use('/api/donations', require('./routes/donationRoutes'));
+app.use('/api/donations', donationRoutes);
 
 
 // Basic route for testing

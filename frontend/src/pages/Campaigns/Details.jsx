@@ -1,8 +1,7 @@
 // src/pages/Campaigns/Details.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-
+import { donationService } from "../../services/donationService";
 
 import ProgressBar from "../../components/ProgressBar";
 import DonationForm from "../../components/DonationForm";
@@ -17,6 +16,7 @@ export default function Details() {
   const [donations, setDonations] = useState([]);
   const [receivedItems, setReceivedItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchCampaignData = async () => {
     try {

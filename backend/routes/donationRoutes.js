@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { createDonation, getDonationsByCampaign } = require('../controllers/donationController');
 const donationController = require('../controllers/donationController');
+const auth = require('../middleware/auth');
 
-
-router.post('/', donationController.createDonation); // Create donation
-router.get('/:campaignId', donationController.getDonationsByCampaign); // Get donations for a campaign
+// Routes
+router.post('/', donationController.createDonation);
+router.get('/', donationController.getDonations);
+router.get('/campaign/:campaignId', donationController.getDonationsByCampaign);
 
 module.exports = router;
 

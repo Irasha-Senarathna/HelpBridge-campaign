@@ -8,7 +8,8 @@ import medicineImage from '../assets/images/medicine.jpg';
 import booksImage from '../assets/images/books.jpg';
 import { useNavigate } from 'react-router-dom';
 import DonationList from '../components/DonationList';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Donate = () => {
   const [donationAmounts, setDonationAmounts] = useState({});
@@ -16,8 +17,6 @@ const Donate = () => {
   const [donations, setDonations] = useState([]);
   const navigate = useNavigate();
   
-
-
   // campaigns will be fetched from backend (do not hardcode)
   const [campaigns, setCampaigns] = useState([]);
 
@@ -98,51 +97,68 @@ const Donate = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // ...existing code...
+const handleDonate = async (campaignId) => {
+    try {
+        const amount = Number(donationAmounts[campaignId]) || 0;
+        
+        if (amount <= 0) {
+            toast.error('Please enter a valid amount');
+            return;
+        }
 
-const handleDonate = (campaignId) => {
-    const amount = Number(donationAmounts[campaignId]) || 0;
-    
-    if (amount <= 0) {
-        toast.error('Please enter a valid amount');
-        return;
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/donations`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+                donation_amount: amount,
+                campaign: campaignId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to process donation');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update campaigns with new donation amount
+            setCampaigns(prevCampaigns => 
+                prevCampaigns.map(campaign => {
+                    if (campaign.id === campaignId) {
+                        const newRaised = Number(campaign.raised) + amount;
+                        const newProgress = Math.min(
+                            Math.round((newRaised / campaign.targetAmount) * 100),
+                            100
+                        );
+                        
+                        return {
+                            ...campaign,
+                            raised: newRaised,
+                            progress: newProgress
+                        };
+                    }
+                    return campaign;
+                })
+            );
+
+            // Clear donation amount and show success message
+            setDonationAmounts(prev => ({ ...prev, [campaignId]: '' }));
+            toast.success('Thank you for your donation!');
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+
+            // Refresh donations list
+            fetchDonations();
+        }
+    } catch (error) {
+        console.error('Donation error:', error);
+        toast.error(error.message || 'Failed to process donation');
     }
-
-    // Update campaigns with new donation amount
-    setCampaigns(prevCampaigns => 
-        prevCampaigns.map(campaign => {
-            if (campaign.id === campaignId) {
-                const newRaised = Number(campaign.raised) + amount;
-                const newProgress = Math.min(
-                    Math.round((newRaised / campaign.targetAmount) * 100),
-                    100
-                );
-                
-                return {
-                    ...campaign,
-                    raised: newRaised,
-                    progress: newProgress
-                };
-            }
-            return campaign;
-        })
-    );
-
-    // Update donations list
-    setDonations(prev => [...prev, {
-        id: Date.now(),
-        campaignId,
-        amount,
-        date: new Date().toISOString()
-    }]);
-
-    // Clear donation amount and show success message
-    setDonationAmounts(prev => ({ ...prev, [campaignId]: '' }));
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
 };
-
-// ...existing code...
 
   const handleAmountChange = (campaignId, value) => {
     setDonationAmounts(prev => ({ ...prev, [campaignId]: value }));
